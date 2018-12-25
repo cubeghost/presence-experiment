@@ -1,0 +1,54 @@
+{
+  "name": "presence-experiment",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "build": "webpack --watch",
+    "heroku-postinstall": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cubeghost/presence-experiment.git"
+  },
+  "author": "Alex Baldwin <webmaster@cubegho.st> (https://cubegho.st/)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cubeghost/presence-experiment/issues"
+  },
+  "homepage": "https://github.com/cubeghost/presence-experiment#readme",
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-transform-runtime": "^7.2.0",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/runtime": "^7.2.0",
+    "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.4",
+    "eslint": "^5.11.0",
+    "eslint-formatter-pretty": "^2.0.0",
+    "eslint-loader": "^2.1.1",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-react": "^7.11.1",
+    "file-loader": "^3.0.1",
+    "friendly-errors-webpack-plugin": "^1.7.0",
+    "happypack": "^5.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "simple-progress-webpack-plugin": "^1.1.2",
+    "socket.io-client": "^2.2.0",
+    "uglifyjs-webpack-plugin": "^2.1.0",
+    "webpack": "^4.28.2",
+    "webpack-cli": "^3.1.2"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "dotenv": "^6.2.0",
+    "express": "^4.16.4",
+    "find-cache-dir": "^2.0.0",
+    "helmet": "^3.15.0",
+    "socket.io": "^2.2.0"
+  }
+}
