@@ -6,7 +6,7 @@ const findCacheDir = require('find-cache-dir');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const HappyPack = require('happypack');
 /* eslint-disable new-cap */
 const happyThreadPool = HappyPack.ThreadPool({ size: 8 });
@@ -139,19 +139,12 @@ if (process.env.NODE_ENV === 'production') {
   };
 
   config.plugins.push(
-    new UglifyJsPlugin({
-      sourceMap: true,
+    new TerserPlugin({
       parallel: true,
-      uglifyOptions: {
-        // React doesn't support IE8
-        ie8: false,
-        ecma: 7,
-        warnings: true,
-        output: {
-          comments: false,
-        },
+      terserOptions: {
+        ecma: 6,
       },
-    })
+    }),
   );
 }
 
