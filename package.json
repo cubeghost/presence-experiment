@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "build": "webpack --watch",
-    "heroku-postinstall": "webpack"
+    "heroku-postbuild": "webpack"
   },
   "repository": {
     "type": "git",
