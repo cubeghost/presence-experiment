@@ -3,10 +3,15 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
+const debugModule = require('debug');
+// const redis = require('redis');
+
+const events = require('./events');
 
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+// const client = redis.createClient(process.env.REDIS_URL);
 
 const buildDir = path.resolve('build');
 
@@ -17,10 +22,52 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(buildDir, '/index.html'));
 });
 
-io.on('connection', function (socket) {
-  console.log('a user connected');
+const users = {}; // TODO how to clean up????
+
+io.on('connection', socket => {
+  const debug = debugModule('presence:user');
+
+  debug(`a user connected ${socket.id}`);
+
+  socket.emit(events.updateUsers, users);
+
+  socket.on(events.setUsername, ({ username }, cool) => {
+    users[socket.id] = { 
+      id: socket.id, 
+      username: username, 
+      position: null,
+    };
+
+    debug(`user ${socket.id} set username to "${username}"`);
+
+    io.emit(events.updateUsers, users);
+
+    cool(true);
+  });
+
+  socket.on(events.setPosition, ({ x, y }, cool) => {
+    if (!users[socket.id]) {
+      cool(false);
+      return;
+    }
+
+    users[socket.id].position = { x, y };
+
+    debug(`${users[socket.id].username} moved`, x, y);
+
+    io.emit(events.updateUsers, users);
+  });
+
+  socket.on('disconnect', () => {
+    delete users[socket.id];
+
+    debug(`user ${socket.id} disconnected`);
+
+    io.emit(events.updateUsers, users);
+  });
 });
 
 server.listen(process.env.PORT, () => {
-  console.log(`http://localhost:${process.env.PORT}/`);
+  const debug = debugModule('presence:server');
+  debug(`http://localhost:${process.env.PORT}/`);
 });
