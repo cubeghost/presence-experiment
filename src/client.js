@@ -1,26 +1,81 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import autobind from 'class-autobind';
-import { isEmpty, map } from 'lodash';
+import { map } from 'lodash';
+import { flow, sortBy, reverse, head, isEmpty, trim } from 'lodash/fp';
 import io from 'socket.io-client';
 import debounce from 'debounce';
 
 import events from './events';
 
-const MOUSE_DEBOUNCE = 50;
+const MOUSE_DEBOUNCE = 10;
+const isStringEmpty = flow(trim, isEmpty);
 
-const User = ({ username, position }) => (
-  <div style={{ 
-    position: 'absolute', 
-    top: 0, 
-    left: 0, 
-    border: '1px solid black',
-    padding: '2px',
-    transform: `translate(${position.x}px,${position.y}px)` 
-  }}>
-    <span>{username}</span>
-  </div>
-);
+const User = (props) => {
+  const { 
+    username, 
+    position, 
+    messages,
+    isInputMode, // this is getting out of hand, time for redux soon
+    message,
+    sendMessage,
+    handleMessageInput,
+  } = props;
+
+  const lastMessage = flow(
+    sortBy('sentAt'),
+    reverse,
+    head,
+  )(messages);
+
+  return (
+    <div style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      transform: `translate(${position.x}px,${position.y}px)`
+    }}>
+
+      {lastMessage && (
+        <p 
+          key={`message-${username}-${lastMessage.sentAt}`}
+          style={{
+            position: 'absolute',
+            top: 0,
+            transform: 'translateY(-100%)',
+            opacity: 0.5,
+            width: '200px',
+            margin: 0,
+          }}
+        >
+          "{lastMessage.body}"
+        </p>
+      )}
+
+      <p style={{
+        border: '1px solid black',
+        padding: '4px',
+        display: 'table',
+        margin: '0.5em 0',
+      }}>
+        {username}
+      </p>
+
+      {isInputMode && (
+        <form onSubmit={sendMessage}>
+          <input
+            type="text"
+            autoFocus={true}
+            id="message"
+            value={message}
+            onChange={handleMessageInput}
+          />
+        </form>
+      )}
+
+    </div>
+  );
+};
 
 class Client extends Component {
   constructor() {
@@ -32,7 +87,9 @@ class Client extends Component {
       socketId: null,
       isConnected: false,
       isUsernameSet: false,
+      isTyping: false,
       username: '',
+      message: '',
       users: {}
     };
   }
@@ -50,13 +107,22 @@ class Client extends Component {
     this.socket.on(events.updateUsers, users => {
       this.setState({ users });
     });
+    this.socket.on('reconnect', () => {
+      this.setState({
+        socketId: this.socket.id,
+        isConnected: true,
+      });
+      this.setUsername();
+    })
     this.socket.on('disconnect', reason => {
-      console.log('disconnect', reason);
+      console.error('disconnect', reason);
+      this.setState({ isConnected: false });
     });
 
     // set up event listeners
     window.addEventListener('mouseenter', debounce(this.handleMouseEvent, MOUSE_DEBOUNCE));
     window.addEventListener('mousemove', debounce(this.handleMouseEvent, MOUSE_DEBOUNCE));
+    window.addEventListener('click', this.handleClick);
   }
 
   componentWillUnmount() {
@@ -67,7 +133,8 @@ class Client extends Component {
     // clean up event listeners
     window.removeEventListener('mouseenter', debounce(this.handleMouseEvent, MOUSE_DEBOUNCE));
     window.removeEventListener('mousemove', debounce(this.handleMouseEvent, MOUSE_DEBOUNCE));
-  }
+    window.removeEventListener('click', this.handleClick);
+ }
 
   handleUsernameInput(event) {
     this.setState({
@@ -75,12 +142,36 @@ class Client extends Component {
     });
   }
 
-  confirmUsername(event) {
-    event.preventDefault();
+  handleMessageInput(event) {
+    this.setState({
+      message: event.target.value
+    });
+  }
+
+  sendMessage(event) {
+    if (event) event.preventDefault();
+
+    const { message } = this.state;
+    const resetState = {
+      isTyping: false,
+      message: ''
+    };
+
+    if (!isStringEmpty(message)) {
+      this.socket.emit(events.sendMessage, { message }, cool => {
+        this.setState(resetState);
+      });
+    } else {
+      this.setState(resetState);
+    }
+  }
+
+  setUsername(event) {
+    if (event) event.preventDefault();
 
     const { username } = this.state;
 
-    if (!isEmpty(username)) {
+    if (!isStringEmpty(username)) {
       this.socket.emit(events.setUsername, { username }, cool => {
         if (cool == true) {
           this.setState({ isUsernameSet: true });
@@ -93,16 +184,20 @@ class Client extends Component {
     const { isUsernameSet, isConnected } = this.state;
 
     if (isUsernameSet && isConnected) {
-      this.socket.emit(events.setPosition, { x: event.pageX, y: event.pageY }, cool => {
-        if (cool == false) {
-          this.setState({ isConnected: false });
-        }
-      });
+      this.socket.emit(events.setPosition, { x: event.pageX, y: event.pageY });
+    }
+  }
+
+  handleClick(event) {
+    const { isConnected, isUsernameSet, isTyping } = this.state;
+
+    if (isConnected && isUsernameSet) {
+      this.setState({ isTyping: !isTyping });
     }
   }
 
   render() {
-    const { socketId, isConnected, isUsernameSet, username, users } = this.state;
+    const { socketId, isConnected, isUsernameSet, isTyping, username, message, users } = this.state;
 
     return (
       <div>
@@ -114,10 +209,13 @@ class Client extends Component {
           your socket id is {socketId}
         </p>
         {isUsernameSet && (
-          <p>your username is {username}</p>
+          <Fragment>
+            <p>your username is {username}</p>
+            <p>click to type messages</p>
+          </Fragment>
         )}
         {!isUsernameSet && (
-          <form onSubmit={this.confirmUsername}>
+          <form onSubmit={this.setUsername}>
             <label htmlFor="username">name</label>
             <input
               type="text"
@@ -125,13 +223,24 @@ class Client extends Component {
               value={username}
               onChange={this.handleUsernameInput}
             />
-            <button onClick={this.confirmUsername}>ok</button>
+            <button onClick={this.setUsername}>ok</button>
           </form>
         )}
         {map(users, user => {
           if (!user.position) return null;
+          const isInputMode = (user.id === socketId && isTyping);
 
-          return <User username={user.username} position={user.position} key={user.id} />;
+          return (
+            <User 
+              username={user.username} 
+              position={user.position} 
+              messages={user.messages}
+              isInputMode={isInputMode}
+              handleMessageInput={this.handleMessageInput}
+              sendMessage={this.sendMessage}
+              key={user.id} 
+            />
+          );
         })}
       </div>
     );

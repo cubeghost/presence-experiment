@@ -36,6 +36,7 @@ io.on('connection', socket => {
       id: socket.id, 
       username: username, 
       position: null,
+      messages: []
     };
 
     debug(`user ${socket.id} set username to "${username}"`);
@@ -45,15 +46,32 @@ io.on('connection', socket => {
     cool(true);
   });
 
-  socket.on(events.setPosition, ({ x, y }, cool) => {
+  socket.on(events.setPosition, ({ x, y }) => {
     if (!users[socket.id]) {
-      cool(false);
       return;
     }
 
     users[socket.id].position = { x, y };
 
-    debug(`${users[socket.id].username} moved`, x, y);
+    // debug(`${users[socket.id].username} moved`, x, y);
+
+    io.emit(events.updateUsers, users);
+  });
+
+  socket.on(events.sendMessage, ({ message }, cool) => {
+    if (!users[socket.id]) {
+      cool(false);
+      return;
+    }
+
+    users[socket.id].messages.push({ 
+      body: message, 
+      sentAt: Math.floor(new Date() / 1000) 
+    });
+
+    cool(true);
+
+    debug(`${users[socket.id].username} said: "${message}"`);
 
     io.emit(events.updateUsers, users);
   });
