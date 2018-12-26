@@ -2,13 +2,14 @@ import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import autobind from 'class-autobind';
 import { map } from 'lodash';
-import { flow, sortBy, reverse, head, isEmpty, trim } from 'lodash/fp';
+import { flow, sortBy, filter, reverse, slice, isEmpty, trim } from 'lodash/fp';
 import io from 'socket.io-client';
 import debounce from 'debounce';
 
 import events from './events';
 
 const MOUSE_DEBOUNCE = 10;
+const MESSAGE_EXPIRY = 30;
 const isStringEmpty = flow(trim, isEmpty);
 
 const User = (props) => {
@@ -22,11 +23,14 @@ const User = (props) => {
     handleMessageInput,
   } = props;
 
-  const lastMessage = flow(
+  const now = Math.floor(new Date() / 1000);
+  const recentMessages = flow(
+    filter(message => ((now - message.sentAt) < MESSAGE_EXPIRY)), // TODO expire on the server
     sortBy('sentAt'),
     reverse,
-    head,
-  )(messages);
+    slice(0, 3),
+    reverse,
+  )(messages);  
 
   return (
     <div style={{
@@ -36,20 +40,20 @@ const User = (props) => {
       transform: `translate(${position.x}px,${position.y}px)`
     }}>
 
-      {lastMessage && (
-        <p 
-          key={`message-${username}-${lastMessage.sentAt}`}
-          style={{
-            position: 'absolute',
-            top: 0,
-            transform: 'translateY(-100%)',
-            opacity: 0.5,
-            width: '200px',
-            margin: 0,
-          }}
-        >
-          "{lastMessage.body}"
-        </p>
+      {recentMessages.length > 0 && ( 
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          transform: 'translateY(-100%)',
+          opacity: 0.5,
+          width: '200px',
+        }}>
+          {map(recentMessages, message => (
+            <p key={`message-${username}-${message.sentAt}`} style={{ margin: 0 }}>
+              "{message.body}"
+            </p>
+          ))}
+        </div>
       )}
 
       <p style={{
