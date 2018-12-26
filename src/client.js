@@ -201,7 +201,7 @@ class Client extends Component {
 
     return (
       <div>
-        <h1>hi</h1>
+        <h1>ephemeral web presence space</h1>
         {!isConnected && (
           <p style={{ color: 'red' }}>disconnected</p>
         )} 
@@ -216,7 +216,7 @@ class Client extends Component {
         )}
         {!isUsernameSet && (
           <form onSubmit={this.setUsername}>
-            <label htmlFor="username">name</label>
+            <label htmlFor="username" style={{ marginRight: '0.5em' }}>name</label>
             <input
               type="text"
               id="username"
