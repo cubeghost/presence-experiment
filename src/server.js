@@ -4,14 +4,12 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const debugModule = require('debug');
-// const redis = require('redis');
 
 const actionTypes = require('./state/actions');
 
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
-// const client = redis.createClient(process.env.REDIS_URL);
 
 const buildDir = path.resolve('build');
 

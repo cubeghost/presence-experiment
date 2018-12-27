@@ -9,6 +9,7 @@ import debounce from 'debounce';
 
 import SocketProvider from 'components/SocketProvider';
 import Messages from 'components/Messages';
+import CursorPicker from 'components/CursorPicker';
 
 import initialState from 'state/initial';
 import configureStore from 'state/store';
@@ -220,6 +221,7 @@ class Client extends Component {
               onChange={this.handleUsernameInput}
             />
             <button onClick={this.setUsername}>ok</button>
+            {/* <CursorPicker /> */}
           </form>
         )}
         {map(users, user => {
