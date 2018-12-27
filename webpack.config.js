@@ -7,6 +7,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const WebpackCleanPlugin = require('clean-webpack-plugin');
 const HappyPack = require('happypack');
 /* eslint-disable new-cap */
@@ -121,6 +122,7 @@ const config = {
       format: 'compact',
     }),
     new FriendlyErrorsWebpackPlugin(),
+    new CaseSensitivePathsPlugin(),
     new WebpackCleanPlugin([`${paths.appBuild}/client.*.js`]),
   ]
 };
