@@ -1,36 +1,47 @@
 import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
+import { Provider, connect } from 'react-redux';
+import io from 'socket.io-client';
 import autobind from 'class-autobind';
 import { map } from 'lodash';
-import { flow, sortBy, filter, reverse, slice, isEmpty, trim } from 'lodash/fp';
-import io from 'socket.io-client';
+import { flow, isEmpty, trim } from 'lodash/fp';
 import debounce from 'debounce';
 
-import events from './events';
+import SocketProvider from 'components/socket';
+import initialState from 'state/initial';
+import configureStore from 'state/store';
+import { setUsername, setPosition, sendMessage } from 'state/actions';
 
 const MOUSE_DEBOUNCE = 10;
-const MESSAGE_EXPIRY = 30;
 const isStringEmpty = flow(trim, isEmpty);
+
+const socket = io();
+const store = configureStore(initialState, socket);
+
+const mapStateToProps = state => {
+  return {
+    users: state.users,
+    messages: state.messages,
+    errors: state.errors,
+    socketId: state.connection.socketId,
+    isConnected: state.connection.isConnected,
+  }
+};
+const mapDispatchToProps = dispatch => ({
+  dispatchSetUsername: username => dispatch(setUsername(username)),
+  dispatchSetPosition: position => dispatch(setPosition(position)),
+  dispatchSendMessage: message => dispatch(sendMessage(message)),
+})
 
 const User = (props) => {
   const { 
     username, 
     position, 
-    messages,
     isInputMode, // this is getting out of hand, time for redux soon
     message,
     sendMessage,
     handleMessageInput,
   } = props;
-
-  const now = Math.floor(new Date() / 1000);
-  const recentMessages = flow(
-    filter(message => ((now - message.sentAt) < MESSAGE_EXPIRY)), // TODO expire on the server
-    sortBy('sentAt'),
-    reverse,
-    slice(0, 3),
-    reverse,
-  )(messages);  
 
   return (
     <div style={{
@@ -39,22 +50,6 @@ const User = (props) => {
       left: 0,
       transform: `translate(${position.x}px,${position.y}px)`
     }}>
-
-      {recentMessages.length > 0 && ( 
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          transform: 'translateY(-100%)',
-          opacity: 0.5,
-          width: '200px',
-        }}>
-          {map(recentMessages, message => (
-            <p key={`message-${username}-${message.sentAt}`} style={{ margin: 0 }}>
-              "{message.body}"
-            </p>
-          ))}
-        </div>
-      )}
 
       <p style={{
         border: '1px solid black',
@@ -88,40 +83,34 @@ class Client extends Component {
     autobind(this);
 
     this.state = {
-      socketId: null,
-      isConnected: false,
       isUsernameSet: false,
       isTyping: false,
       username: '',
       message: '',
-      users: {}
     };
   }
 
   componentDidMount() {
     // set up socket
-    const socket = io();
-    this.socket = socket;
-    this.socket.on('connect', () => {
-      this.setState({
-        socketId: socket.id,
-        isConnected: true,
-      });
-    });
-    this.socket.on(events.updateUsers, users => {
-      this.setState({ users });
-    });
-    this.socket.on('reconnect', () => {
-      this.setState({
-        socketId: this.socket.id,
-        isConnected: true,
-      });
-      this.setUsername();
-    })
-    this.socket.on('disconnect', reason => {
-      console.error('disconnect', reason);
-      this.setState({ isConnected: false });
-    });
+    // const socket = io();
+    // this.socket = socket;
+    // this.socket.on('connect', () => {
+    //   this.setState({
+    //     socketId: socket.id,
+    //     isConnected: true,
+    //   });
+    // });
+    // this.socket.on('reconnect', () => {
+    //   this.setState({
+    //     socketId: this.socket.id,
+    //     isConnected: true,
+    //   });
+    //   this.setUsername();
+    // })
+    // this.socket.on('disconnect', reason => {
+    //   console.error('disconnect', reason);
+    //   this.setState({ isConnected: false });
+    // });
 
     // set up event listeners
     window.addEventListener('mouseenter', debounce(this.handleMouseEvent, MOUSE_DEBOUNCE));
@@ -130,10 +119,6 @@ class Client extends Component {
   }
 
   componentWillUnmount() {
-    // clean up socket
-    this.socket.close();
-    this.socket = null;
-
     // clean up event listeners
     window.removeEventListener('mouseenter', debounce(this.handleMouseEvent, MOUSE_DEBOUNCE));
     window.removeEventListener('mousemove', debounce(this.handleMouseEvent, MOUSE_DEBOUNCE));
@@ -156,15 +141,16 @@ class Client extends Component {
     if (event) event.preventDefault();
 
     const { message } = this.state;
+    const { dispatchSendMessage } = this.props;
+ 
     const resetState = {
       isTyping: false,
       message: ''
     };
 
     if (!isStringEmpty(message)) {
-      this.socket.emit(events.sendMessage, { message }, cool => {
-        this.setState(resetState);
-      });
+      dispatchSendMessage(message);
+      this.setState(resetState);
     } else {
       this.setState(resetState);
     }
@@ -174,26 +160,29 @@ class Client extends Component {
     if (event) event.preventDefault();
 
     const { username } = this.state;
+    const { dispatchSetUsername } = this.props;
 
     if (!isStringEmpty(username)) {
-      this.socket.emit(events.setUsername, { username }, cool => {
-        if (cool == true) {
-          this.setState({ isUsernameSet: true });
-        }
-      });
+      dispatchSetUsername(username);
+      this.setState({ isUsernameSet: true });
     }
   }
 
   handleMouseEvent(event) {
-    const { isUsernameSet, isConnected } = this.state;
+    const { isConnected, dispatchSetPosition } = this.props;
+    const { isUsernameSet } = this.state;
 
     if (isUsernameSet && isConnected) {
-      this.socket.emit(events.setPosition, { x: event.pageX, y: event.pageY });
+      dispatchSetPosition({ 
+        x: event.pageX, 
+        y: event.pageY 
+      });
     }
   }
 
   handleClick(event) {
-    const { isConnected, isUsernameSet, isTyping } = this.state;
+    const { isConnected } = this.props;
+    const { isUsernameSet, isTyping } = this.state;
 
     if (isConnected && isUsernameSet) {
       this.setState({ isTyping: !isTyping });
@@ -201,7 +190,8 @@ class Client extends Component {
   }
 
   render() {
-    const { socketId, isConnected, isUsernameSet, isTyping, username, message, users } = this.state;
+    const { socketId, isConnected, users } = this.props;
+    const { isUsernameSet, isTyping, username, message } = this.state;
 
     return (
       <div>
@@ -238,8 +228,8 @@ class Client extends Component {
             <User 
               username={user.username} 
               position={user.position} 
-              messages={user.messages}
               isInputMode={isInputMode}
+              message={message}
               handleMessageInput={this.handleMessageInput}
               sendMessage={this.sendMessage}
               key={user.id} 
@@ -251,4 +241,14 @@ class Client extends Component {
   }
 }
 
-ReactDOM.render(<Client />, document.querySelector('#react-root'));
+const ConnectedClient = connect(mapStateToProps, mapDispatchToProps)(Client);
+
+const App = () => (
+  <Provider store={store}>
+    <SocketProvider socket={socket}>
+      <ConnectedClient />
+    </SocketProvider>
+  </Provider>
+);
+
+ReactDOM.render(<App />, document.querySelector('#react-root'));

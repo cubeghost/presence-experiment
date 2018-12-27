@@ -7,6 +7,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const WebpackCleanPlugin = require('clean-webpack-plugin');
 const HappyPack = require('happypack');
 /* eslint-disable new-cap */
 const happyThreadPool = HappyPack.ThreadPool({ size: 8 });
@@ -120,6 +121,7 @@ const config = {
       format: 'compact',
     }),
     new FriendlyErrorsWebpackPlugin(),
+    new WebpackCleanPlugin([`${paths.appBuild}/client.*.js`]),
   ]
 };
 

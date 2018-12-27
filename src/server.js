@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const debugModule = require('debug');
 // const redis = require('redis');
 
-const events = require('./events');
+const actionTypes = require('./state/actions');
 
 const app = express();
 const server = require('http').Server(app);
@@ -22,58 +22,71 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(buildDir, '/index.html'));
 });
 
+const ACTION = 'action';
+
 const users = {}; // TODO how to clean up????
+const messages = [];
 
 io.on('connection', socket => {
   const debug = debugModule('presence:user');
 
   debug(`a user connected ${socket.id}`);
 
-  socket.emit(events.updateUsers, users);
-
-  socket.on(events.setUsername, ({ username }, cool) => {
-    users[socket.id] = { 
-      id: socket.id, 
-      username: username, 
-      position: null,
-      messages: []
-    };
-
-    debug(`user ${socket.id} set username to "${username}"`);
-
-    io.emit(events.updateUsers, users);
-
-    cool(true);
+  socket.emit(ACTION, {
+    type: actionTypes.UPDATE_USERS,
+    data: { users }
   });
 
-  socket.on(events.setPosition, ({ x, y }) => {
-    if (!users[socket.id]) {
-      return;
+  socket.on(ACTION, ({ type, data }) => {
+    switch (type) {
+
+      case actionTypes.SET_USERNAME:
+        const { username } = data;
+        users[socket.id] = {
+          id: socket.id,
+          username: username,
+          cursor: null,
+          position: null,
+        };
+        
+        debug(`user ${socket.id} set username to "${username}"`);
+
+        io.emit(ACTION, { 
+          type: actionTypes.UPDATE_USERS, 
+          data: { users } 
+        });
+        break;
+
+      case actionTypes.SET_POSITION:
+        if (!users[socket.id]) return;
+
+        const { x, y } = data;
+        users[socket.id].position = { x, y };
+
+        io.emit(ACTION, {
+          type: actionTypes.UPDATE_USERS,
+          data: { users }
+        });
+        break;
+
+      case actionTypes.SEND_MESSAGE:
+        if (!users[socket.id]) return;
+
+        const { message } = data;
+        messages.push({
+          user: socket.id,
+          body: message,
+          sentAt: Math.floor(new Date() / 1000),
+        });
+
+        debug(`${users[socket.id].username} said: "${message}"`);
+
+        io.emit(ACTION, {
+          type: actionTypes.UPDATE_MESSAGES,
+          data: { messages }
+        });
+       break;
     }
-
-    users[socket.id].position = { x, y };
-
-    // debug(`${users[socket.id].username} moved`, x, y);
-
-    io.emit(events.updateUsers, users);
-  });
-
-  socket.on(events.sendMessage, ({ message }, cool) => {
-    if (!users[socket.id]) {
-      cool(false);
-      return;
-    }
-
-    users[socket.id].messages.push({ 
-      body: message, 
-      sentAt: Math.floor(new Date() / 1000) 
-    });
-
-    cool(true);
-
-    debug(`${users[socket.id].username} said: "${message}"`);
-
-    io.emit(events.updateUsers, users);
   });
 
   socket.on('disconnect', () => {
@@ -81,7 +94,10 @@ io.on('connection', socket => {
 
     debug(`user ${socket.id} disconnected`);
 
-    io.emit(events.updateUsers, users);
+    io.emit(ACTION, {
+      type: actionTypes.UPDATE_USERS,
+      data: { users }
+    });
   });
 });
 
