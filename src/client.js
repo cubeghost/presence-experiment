@@ -7,7 +7,9 @@ import { map } from 'lodash';
 import { flow, isEmpty, trim } from 'lodash/fp';
 import debounce from 'debounce';
 
-import SocketProvider from 'components/socket';
+import SocketProvider from 'components/SocketProvider';
+import Messages from 'components/Messages';
+
 import initialState from 'state/initial';
 import configureStore from 'state/store';
 import { setUsername, setPosition, sendMessage } from 'state/actions';
@@ -236,6 +238,7 @@ class Client extends Component {
             />
           );
         })}
+        <Messages />
       </div>
     );
   }

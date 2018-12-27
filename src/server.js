@@ -36,6 +36,10 @@ io.on('connection', socket => {
     type: actionTypes.UPDATE_USERS,
     data: { users }
   });
+  socket.emit(ACTION, {
+    type: actionTypes.UPDATE_MESSAGES,
+    data: { messages }
+  });
 
   socket.on(ACTION, ({ type, data }) => {
     switch (type) {
@@ -75,6 +79,7 @@ io.on('connection', socket => {
         const { message } = data;
         messages.push({
           user: socket.id,
+          username: users[socket.id].username,
           body: message,
           sentAt: Math.floor(new Date() / 1000),
         });
