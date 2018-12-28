@@ -57,9 +57,9 @@ class Client extends Component {
  }
 
   handleMouseEvent(event) {
-    const { username, isConnected, dispatchSetPosition } = this.props;
+    const { isConnected, dispatchSetPosition } = this.props;
 
-    if (username && isConnected) {
+    if (isConnected) {
       dispatchSetPosition({ 
         x: event.pageX, 
         y: event.pageY 
