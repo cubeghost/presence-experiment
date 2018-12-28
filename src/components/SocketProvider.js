@@ -1,18 +1,24 @@
-import { Component } from 'react'
+import { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { setSocketId, socketConnect, socketDisconnect } from 'state/actions';
+import { setSocketId, socketConnect, socketDisconnect, identify } from 'state/actions';
 
 const mapDispatchToProps = dispatch => ({
   dispatchSetSocketId: socketId => dispatch(setSocketId(socketId)),
   dispatchConnect: () => dispatch(socketConnect()),
   dispatchDisconnect: () => dispatch(socketDisconnect()),
+  dispatchIdentify: () => dispatch(identify()),
 });
 
 class SocketProvider extends Component {
-
   componentDidMount() {
-    const { socket, dispatchSetSocketId, dispatchConnect, dispatchDisconnect } = this.props;
+    const { 
+      socket, 
+      dispatchSetSocketId, 
+      dispatchConnect, 
+      dispatchDisconnect, 
+      dispatchIdentify 
+    } = this.props;
 
     socket.on('connect', () => {
       dispatchSetSocketId(this.props.socket.id);
@@ -21,12 +27,8 @@ class SocketProvider extends Component {
     socket.on('reconnect', () => {
       dispatchSetSocketId(this.props.socket.id);
       dispatchConnect();
-      // TODO
-      // this.props.dispatch({
-      //   type: actionTypes.SET_USERNAME,
-      //   data: { username },
-      // });
-    })
+      dispatchIdentify();
+    });
     socket.on('disconnect', reason => {
       console.error('disconnect', reason);
       dispatchDisconnect();

@@ -1,6 +1,6 @@
 import { createStore, applyMiddleware, compose } from 'redux';
 import createSocketIoMiddleware from 'redux-socket.io';
-// import thunk from 'redux-thunk';
+import thunk from 'redux-thunk';
 
 import { SERVER_ACTION_PREFIX } from 'state/actions';
 import reducers from 'state/reducers';
@@ -18,7 +18,7 @@ export default function configureStore(initialState, socket) {
   const store = createStore(
     reducers,
     initialState,
-    composeEnhancers(applyMiddleware(socketIoMiddleware))
+    composeEnhancers(applyMiddleware(thunk, socketIoMiddleware))
   );
 
   return store;

@@ -8,6 +8,7 @@ const debugModule = require('debug');
 const actionTypes = require('./state/actions');
 
 const app = express();
+/* eslint-disable new-cap */
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
@@ -41,17 +42,16 @@ io.on('connection', socket => {
 
   socket.on(ACTION, ({ type, data }) => {
     switch (type) {
-
-      case actionTypes.SET_USERNAME:
-        const { username } = data;
+      case actionTypes.IDENTIFY:
+        const { username, cursor } = data;
         users[socket.id] = {
           id: socket.id,
           username: username,
-          cursor: null,
+          cursor: cursor,
           position: null,
         };
         
-        debug(`user ${socket.id} set username to "${username}"`);
+        debug(`user ${socket.id} set username to "${username}" and cursor to "${cursor}"`);
 
         io.emit(ACTION, { 
           type: actionTypes.UPDATE_USERS, 
@@ -88,7 +88,9 @@ io.on('connection', socket => {
           type: actionTypes.UPDATE_MESSAGES,
           data: { messages }
         });
-       break;
+        break;
+      default:
+        break;
     }
   });
 

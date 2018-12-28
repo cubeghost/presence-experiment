@@ -5,7 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "watch:client": "webpack --watch",
-    "watch:server": "nodemon --exec babel-node src/server.js",
+    "watch:server": "nodemon --watch src/server.js --watch src/state.actions.js --exec babel-node src/server.js",
     "build:client": "webpack",
     "build:server": "babel src/server.js -d build && babel src/state/actions.js -d build/state",
     "start": "node build/server.js",
@@ -51,6 +51,7 @@
     "react-redux": "^6.0.0",
     "redux": "^4.0.1",
     "redux-socket.io": "^1.4.0",
+    "redux-thunk": "^2.3.0",
     "simple-progress-webpack-plugin": "^1.1.2",
     "socket.io-client": "^2.2.0",
     "terser-webpack-plugin": "^1.2.0",
@@ -67,5 +68,8 @@
     "lodash": "^4.17.11",
     "socket.io": "^2.2.0",
     "uuid": "^3.3.2"
+  },
+  "eslintConfig": {
+    "extends": "./eslint.js"
   }
 }

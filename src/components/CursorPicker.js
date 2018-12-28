@@ -1,32 +1,52 @@
 import React, { Component } from 'react';
 import { map } from 'lodash';
+import { connect } from 'react-redux';
 
-const cursors = {
-  'black-cat': { file: require('assets/black-cat.gif'), id: 'black-cat' },
-  'brown-cat': { file: require('assets/brown-cat.png'), id: 'brown-cat' },
-  'cat-sleepy': { file: require('assets/cat-sleepy.gif'), id: 'cat-sleepy' },
-  'deer': { file: require('assets/deer.gif'), id: 'deer' },
-  'dinosaur': { file: require('assets/dino.gif'), id: 'dinosaur' },
-  'dog-pant': { file: require('assets/dog-pant.gif'), id: 'dog-pant' },
-  'frog': { file: require('assets/frog.gif'), id: 'frog' },
-  'lizard': { file: require('assets/lizard.gif'), id: 'lizard' },
-  'orange-cat': { file: require('assets/orange-cat.png'), id: 'orange-cat' },
-  'peacock': { file: require('assets/peacock.gif'), id: 'peacock' },
-  'penguin': { file: require('assets/penguin.gif'), id: 'penguin' },
-  'persian-sparkle': { file: require('assets/persian-sparkle.gif'), id: 'persian-sparkle' },
-  'shihtzu': { file: require('assets/shihtzu.gif'), id: 'shihtzu' },
-  'trex-sparkle': { file: require('assets/trex-sparkle.gif'), id: 'trex-sparkle' },
-};
+import { setCursor } from 'state/actions';
+import { CURSORS } from 'consts';
 
-console.log(cursors)
+const CursorOption = ({ file, id, isSelected, dispatchSetCursor }) => (
+  <label 
+    htmlFor={`CursorOption-${id}`}
+    style={{
+      backgroundColor: isSelected ? 'rgba(0, 0, 255, 0.2)' : 'transparent',
+      display: 'inline-block',
+      padding: '2px',
+    }}
+  >
+    <input
+      type="radio"
+      id={`CursorOption-${id}`}
+      onChange={dispatchSetCursor}
+      style={{
+        opacity: 0,
+        height: 0,
+        width: 0,
+        margin: 0,
+        display: 'block',
+      }}
+    />
+    <img 
+      src={file} 
+      style={{ display: 'block' }}
+    />
+  </label>
+);
+const mapStateToProps = (state, ownProps) => ({
+  isSelected: state.self.cursor === ownProps.id,
+});
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  dispatchSetCursor: event => dispatch(setCursor(ownProps.id)),
+});
+const ConnectedCursorOption = connect(mapStateToProps, mapDispatchToProps)(CursorOption);
 
 class CursorPicker extends Component {
-
   render() {
     return (
       <div>
-        {map(cursors, cursor => (
-          <img src={cursor.file} key={`cursor-${cursor.id}`} />
+        <p>select a cursor:</p>
+        {map(CURSORS, cursor => (
+          <ConnectedCursorOption {...cursor} key={`CursorOption-${cursor.id}`} />
         ))}
       </div>
     );

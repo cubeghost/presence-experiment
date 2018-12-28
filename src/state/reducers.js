@@ -1,21 +1,39 @@
-import _ from 'lodash';
+import { assign } from 'lodash';
 import { combineReducers } from 'redux';
 
 import initialState from 'state/initial';
 import * as actionTypes from 'state/actions';
 
-// const selfReducer = (state = initialState.self, action) => {
-//   switch (action.type) {
-//     case actionTypes.SET_USERNAME:
-//       return Object.assign({}, state, { username: action.data.username });
-//     default:
-//       return state;
-//   }
-// }
+const selfReducer = (state = initialState.self, action) => {
+  switch (action.type) {
+    case actionTypes.SET_USERNAME:
+      return assign({}, state, { 
+        username: action.data.username,
+      });
+    case actionTypes.SET_POSITION:
+      return assign({}, state, {
+        position: { 
+          x: action.data.x,  
+          y: action.data.y,
+        }});
+    case actionTypes.SET_CURSOR:
+      return assign({}, state, { 
+        cursor: action.data.cursor 
+      });
+    case actionTypes.IDENTIFY:
+      return assign({}, state, {
+        username: action.data.username,
+        cursor: action.data.cursor,
+      });
+    default:
+      return state;
+  }
+};
 
 const usersReducer = (state = initialState.users, action) => {
   switch (action.type) {
     case actionTypes.UPDATE_USERS:
+      // Because of disconnects, we don't actually want to use assign here
       return action.data.users;
     default:
       return state;
@@ -41,15 +59,16 @@ const errorsReducer = (state = initialState.errors, action) => {
 const connectionReducer = (state = initialState.connection, action) => {
   switch (action.type) {
     case actionTypes.SET_IS_CONNECTED:
-      return Object.assign({}, state, { isConnected: action.data.isConnected });
+      return assign({}, state, { isConnected: action.data.isConnected });
     case actionTypes.SET_SOCKET_ID:
-      return Object.assign({}, state, { socketId: action.data.socketId });
+      return assign({}, state, { socketId: action.data.socketId });
     default:
       return state;
   }
 };
 
 const reducers = combineReducers({
+  self: selfReducer,
   users: usersReducer,
   messages: messagesReducer,
   errors: errorsReducer,

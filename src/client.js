@@ -4,178 +4,62 @@ import { Provider, connect } from 'react-redux';
 import io from 'socket.io-client';
 import autobind from 'class-autobind';
 import { map } from 'lodash';
-import { flow, isEmpty, trim } from 'lodash/fp';
 import debounce from 'debounce';
 
 import SocketProvider from 'components/SocketProvider';
 import Messages from 'components/Messages';
-import CursorPicker from 'components/CursorPicker';
+import User from 'components/User';
+import Self from 'components/Self';
 
 import initialState from 'state/initial';
 import configureStore from 'state/store';
 import { setUsername, setPosition, sendMessage } from 'state/actions';
 
+import Identify from './components/Identify';
+
 const MOUSE_DEBOUNCE = 10;
-const isStringEmpty = flow(trim, isEmpty);
 
 const socket = io();
 const store = configureStore(initialState, socket);
 
-const mapStateToProps = state => {
-  return {
-    users: state.users,
-    messages: state.messages,
-    errors: state.errors,
-    socketId: state.connection.socketId,
-    isConnected: state.connection.isConnected,
-  }
-};
+const mapStateToProps = state => ({
+  username: state.self.username,
+  cursor: state.self.cursor,
+  users: state.users,
+  messages: state.messages,
+  errors: state.errors,
+  socketId: state.connection.socketId,
+  isConnected: state.connection.isConnected,
+});
+
 const mapDispatchToProps = dispatch => ({
   dispatchSetUsername: username => dispatch(setUsername(username)),
   dispatchSetPosition: position => dispatch(setPosition(position)),
   dispatchSendMessage: message => dispatch(sendMessage(message)),
-})
-
-const User = (props) => {
-  const { 
-    username, 
-    position, 
-    isInputMode, // this is getting out of hand, time for redux soon
-    message,
-    sendMessage,
-    handleMessageInput,
-  } = props;
-
-  return (
-    <div style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      transform: `translate(${position.x}px,${position.y}px)`
-    }}>
-
-      <p style={{
-        border: '1px solid black',
-        padding: '4px',
-        display: 'table',
-        margin: '0.5em 0',
-      }}>
-        {username}
-      </p>
-
-      {isInputMode && (
-        <form onSubmit={sendMessage}>
-          <input
-            type="text"
-            autoFocus={true}
-            id="message"
-            value={message}
-            onChange={handleMessageInput}
-          />
-        </form>
-      )}
-
-    </div>
-  );
-};
+});
 
 class Client extends Component {
   constructor() {
     super();
-
     autobind(this);
-
-    this.state = {
-      isUsernameSet: false,
-      isTyping: false,
-      username: '',
-      message: '',
-    };
   }
 
   componentDidMount() {
-    // set up socket
-    // const socket = io();
-    // this.socket = socket;
-    // this.socket.on('connect', () => {
-    //   this.setState({
-    //     socketId: socket.id,
-    //     isConnected: true,
-    //   });
-    // });
-    // this.socket.on('reconnect', () => {
-    //   this.setState({
-    //     socketId: this.socket.id,
-    //     isConnected: true,
-    //   });
-    //   this.setUsername();
-    // })
-    // this.socket.on('disconnect', reason => {
-    //   console.error('disconnect', reason);
-    //   this.setState({ isConnected: false });
-    // });
-
     // set up event listeners
     window.addEventListener('mouseenter', debounce(this.handleMouseEvent, MOUSE_DEBOUNCE));
     window.addEventListener('mousemove', debounce(this.handleMouseEvent, MOUSE_DEBOUNCE));
-    window.addEventListener('click', this.handleClick);
   }
 
   componentWillUnmount() {
     // clean up event listeners
     window.removeEventListener('mouseenter', debounce(this.handleMouseEvent, MOUSE_DEBOUNCE));
     window.removeEventListener('mousemove', debounce(this.handleMouseEvent, MOUSE_DEBOUNCE));
-    window.removeEventListener('click', this.handleClick);
  }
 
-  handleUsernameInput(event) {
-    this.setState({
-      username: event.target.value
-    });
-  }
-
-  handleMessageInput(event) {
-    this.setState({
-      message: event.target.value
-    });
-  }
-
-  sendMessage(event) {
-    if (event) event.preventDefault();
-
-    const { message } = this.state;
-    const { dispatchSendMessage } = this.props;
- 
-    const resetState = {
-      isTyping: false,
-      message: ''
-    };
-
-    if (!isStringEmpty(message)) {
-      dispatchSendMessage(message);
-      this.setState(resetState);
-    } else {
-      this.setState(resetState);
-    }
-  }
-
-  setUsername(event) {
-    if (event) event.preventDefault();
-
-    const { username } = this.state;
-    const { dispatchSetUsername } = this.props;
-
-    if (!isStringEmpty(username)) {
-      dispatchSetUsername(username);
-      this.setState({ isUsernameSet: true });
-    }
-  }
-
   handleMouseEvent(event) {
-    const { isConnected, dispatchSetPosition } = this.props;
-    const { isUsernameSet } = this.state;
+    const { username, isConnected, dispatchSetPosition } = this.props;
 
-    if (isUsernameSet && isConnected) {
+    if (username && isConnected) {
       dispatchSetPosition({ 
         x: event.pageX, 
         y: event.pageY 
@@ -183,63 +67,44 @@ class Client extends Component {
     }
   }
 
-  handleClick(event) {
-    const { isConnected } = this.props;
-    const { isUsernameSet, isTyping } = this.state;
-
-    if (isConnected && isUsernameSet) {
-      this.setState({ isTyping: !isTyping });
-    }
-  }
-
   render() {
-    const { socketId, isConnected, users } = this.props;
-    const { isUsernameSet, isTyping, username, message } = this.state;
+    const { socketId, isConnected, users, username, cursor } = this.props;
 
     return (
-      <div>
-        <h1>ephemeral web presence space</h1>
+      <div style={{ 
+        width: '100vw',
+        height: '100vh',
+        cursor: !!cursor ? 'none' : 'default',
+        boxSizing: 'border-box',
+        padding: '0.5em',
+      }}>
+        <h1 style={{ marginTop: 0 }}>ephemeral web presence space</h1>
         {!isConnected && (
           <p style={{ color: 'red' }}>disconnected</p>
         )} 
         <p>
           your socket id is {socketId}
         </p>
-        {isUsernameSet && (
+        {username && (
           <Fragment>
-            <p>your username is {username}</p>
+            <p>your username is <strong>{username}</strong></p>
             <p>click to type messages</p>
           </Fragment>
         )}
-        {!isUsernameSet && (
-          <form onSubmit={this.setUsername}>
-            <label htmlFor="username" style={{ marginRight: '0.5em' }}>name</label>
-            <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={this.handleUsernameInput}
-            />
-            <button onClick={this.setUsername}>ok</button>
-            {/* <CursorPicker /> */}
-          </form>
-        )}
+        {!username && <Identify />}
         {map(users, user => {
-          if (!user.position) return null;
-          const isInputMode = (user.id === socketId && isTyping);
+          if (user.id === socketId) return null;
 
           return (
             <User 
               username={user.username} 
               position={user.position} 
-              isInputMode={isInputMode}
-              message={message}
-              handleMessageInput={this.handleMessageInput}
-              sendMessage={this.sendMessage}
+              cursor={user.cursor} 
               key={user.id} 
             />
           );
         })}
+        <Self />
         <Messages />
       </div>
     );

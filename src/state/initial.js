@@ -1,6 +1,7 @@
 export default {
   self: {
-    username: '',
+    username: null,
+    position: null,
     cursor: null
   },
   users: {},

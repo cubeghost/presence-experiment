@@ -8,23 +8,20 @@ const mapStateToProps = state => ({
     sortBy('sentAt'), 
     slice(0, 100)
   )(state.messages),
-  users: state.users,
 });
 
-const Messages = ({ messages, users }) => (
+const Messages = ({ messages }) => (
   <div style={{ 
     opacity: 0.5,
     position: 'absolute',
     bottom: '0.5em' 
   }}>
-    {map(messages, message => {
-      return (
-        <div key={`message-${message.user}-${message.sentAt}`}>
-          <strong>{message.username}:</strong> {message.body}
-        </div>
-      )
-    })}
+    {map(messages, message => (
+      <div key={`message-${message.user}-${message.sentAt}`}>
+        <strong>{message.username}:</strong> {message.body}
+      </div>
+    ))}
   </div>
-)
+);
 
 export default connect(mapStateToProps)(Messages);
