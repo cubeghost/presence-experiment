@@ -11,7 +11,7 @@ const mapDispatchToProps = dispatch => ({
   dispatchSetSocketId: socketId => dispatch(setSocketId(socketId)),
   dispatchConnect: () => dispatch(socketConnect()),
   dispatchDisconnect: () => dispatch(socketDisconnect()),
-  dispatchIdentify: () => dispatch(identify()),
+  dispatchIdentify: username => dispatch(identify(username)),
 });
 
 class SocketProvider extends Component {
