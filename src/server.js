@@ -1,5 +1,5 @@
-let result = require('dotenv').config({ debug: true });
-// console.log(result)
+require('dotenv').config({ debug: true });
+
 const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');

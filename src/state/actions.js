@@ -50,10 +50,8 @@ export const setPosition = ({ x, y }) => (dispatch, getState) => {
 
 export const identify = () => (dispatch, getState) => {
   // Emit username and cursor at the same time to avoid weirdness
-  console.log('IDENTIFY')
   const { self: { username, cursor } } = getState();
   if (!isStringEmpty(username) && cursor) {
-    console.log('IDENTIFY dispatch')
     dispatch({
       type: IDENTIFY,
       data: {
