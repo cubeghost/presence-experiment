@@ -13,7 +13,7 @@ import Self from 'components/Self';
 
 import initialState from 'state/initial';
 import configureStore from 'state/store';
-import { setUsername, setPosition, sendMessage } from 'state/actions';
+import { setPosition } from 'state/actions';
 
 import Identify from './components/Identify';
 
@@ -24,18 +24,16 @@ const store = configureStore(initialState, socket);
 
 const mapStateToProps = state => ({
   username: state.self.username,
-  cursor: state.self.cursor,
   users: state.users,
   messages: state.messages,
   errors: state.errors,
   socketId: state.connection.socketId,
   isConnected: state.connection.isConnected,
+  isIdentified: state.connection.isIdentified,
 });
 
 const mapDispatchToProps = dispatch => ({
-  dispatchSetUsername: username => dispatch(setUsername(username)),
   dispatchSetPosition: position => dispatch(setPosition(position)),
-  dispatchSendMessage: message => dispatch(sendMessage(message)),
 });
 
 class Client extends Component {
@@ -68,13 +66,13 @@ class Client extends Component {
   }
 
   render() {
-    const { socketId, isConnected, users, username, cursor } = this.props;
+    const { socketId, isConnected, isIdentified, users, username } = this.props;
 
     return (
       <div style={{ 
         width: '100vw',
         height: '100vh',
-        cursor: !!cursor ? 'none' : 'default',
+        cursor: isIdentified ? 'none' : 'default',
         boxSizing: 'border-box',
         padding: '0.5em',
       }}>
@@ -90,13 +88,13 @@ class Client extends Component {
         <p>
           your socket id is {socketId}
         </p>
-        {username && (
+        {isIdentified && (
           <Fragment>
             <p>your username is <strong>{username}</strong></p>
             <p>click to type messages</p>
           </Fragment>
         )}
-        {!username && <Identify />}
+        {!isIdentified && <Identify />}
         {map(users, user => {
           if (user.id === socketId) return null;
 

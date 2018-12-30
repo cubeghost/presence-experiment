@@ -1,17 +1,22 @@
 import React, { Component } from 'react';
 import autobind from 'class-autobind';
 import { connect } from 'react-redux';
+import { get } from 'lodash';
+import { flow, isEmpty, trim } from 'lodash/fp';
 
 import { sendMessage } from 'state/actions';
 
 import { CURSORS } from 'consts';
-import { getPositionStyle, isStringEmpty } from 'utils';
+import { getPositionStyle } from 'utils';
+
+const isStringEmpty = flow(trim, isEmpty);
 
 const mapStateToProps = state => ({
   username: state.self.username,
   position: state.self.position,
   cursor: state.self.cursor,
   isConnected: state.connection.isConnected,
+  isIdentified: state.connection.isIdentified,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -39,10 +44,10 @@ class Self extends Component {
   }
 
   handleClick() {
-    const { isConnected, username } = this.props;
+    const { isIdentified, isConnected } = this.props;
     const { isInputEnabled } = this.state;
 
-    if (username && isConnected) {
+    if (isIdentified && isConnected) {
       this.setState({ isInputEnabled: !isInputEnabled });
     }
   }
@@ -73,15 +78,15 @@ class Self extends Component {
   }
 
   render() {
-    const { username, position, cursor } = this.props;
+    const { username, position, cursor, isIdentified } = this.props;
     const { message, isInputEnabled } = this.state;
 
-    if (!position || !username) return null;
+    if (!isIdentified || !position || !username) return null;
 
     return (
       <div style={getPositionStyle(position)}>
 
-        <img src={CURSORS[cursor].file} />
+        <img src={get(CURSORS, `${cursor}.file`)} />
 
         <span style={{ marginLeft: '0.25em' }}>{username}</span>
 

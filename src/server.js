@@ -1,11 +1,14 @@
-require('dotenv').config();
-
+let result = require('dotenv').config({ debug: true });
+// console.log(result)
 const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const debugModule = require('debug');
 
 const actionTypes = require('./state/actions');
+
+// console.log(process.env.DEBUG)
+// console.log(debugModule.names)
 
 const app = express();
 /* eslint-disable new-cap */
@@ -44,6 +47,7 @@ io.on('connection', socket => {
     switch (type) {
       case actionTypes.IDENTIFY:
         const { username, cursor } = data;
+
         users[socket.id] = {
           id: socket.id,
           username: username,

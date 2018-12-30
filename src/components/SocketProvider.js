@@ -3,10 +3,6 @@ import { connect } from 'react-redux';
 
 import { setSocketId, socketConnect, socketDisconnect, identify } from 'state/actions';
 
-const mapStateToProps = state => ({
-  username: state.self.username,
-});
-
 const mapDispatchToProps = dispatch => ({
   dispatchSetSocketId: socketId => dispatch(setSocketId(socketId)),
   dispatchConnect: () => dispatch(socketConnect()),
@@ -31,7 +27,7 @@ class SocketProvider extends Component {
     socket.on('reconnect', () => {
       dispatchSetSocketId(this.props.socket.id);
       dispatchConnect();
-      dispatchIdentify(this.props.username);
+      dispatchIdentify();
     });
     socket.on('disconnect', reason => {
       console.error('disconnect', reason);
@@ -52,4 +48,4 @@ class SocketProvider extends Component {
   
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SocketProvider);
+export default connect(null, mapDispatchToProps)(SocketProvider);

@@ -1,6 +1,6 @@
 export default {
   self: {
-    username: null,
+    username: '',
     position: null,
     cursor: null
   },
@@ -10,5 +10,6 @@ export default {
   connection: {
     socketId: null,
     isConnected: false,
+    isIdentified: false,
   }
 };

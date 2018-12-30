@@ -10,21 +10,16 @@ const selfReducer = (state = initialState.self, action) => {
       return assign({}, state, { 
         username: action.data.username,
       });
+    case actionTypes.SET_CURSOR:
+      return assign({}, state, {
+        cursor: action.data.cursor
+      });
     case actionTypes.SET_POSITION:
       return assign({}, state, {
         position: { 
           x: action.data.x,  
           y: action.data.y,
         }});
-    case actionTypes.SET_CURSOR:
-      return assign({}, state, { 
-        cursor: action.data.cursor 
-      });
-    case actionTypes.IDENTIFY:
-      return assign({}, state, {
-        username: action.data.username,
-        cursor: action.data.cursor,
-      });
     default:
       return state;
   }
@@ -62,6 +57,8 @@ const connectionReducer = (state = initialState.connection, action) => {
       return assign({}, state, { isConnected: action.data.isConnected });
     case actionTypes.SET_SOCKET_ID:
       return assign({}, state, { socketId: action.data.socketId });
+    case actionTypes.IDENTIFY:
+      return assign({}, state, { isIdentified: true });
     default:
       return state;
   }

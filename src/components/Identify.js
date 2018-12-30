@@ -3,17 +3,19 @@ import autobind from 'class-autobind';
 import { connect } from 'react-redux';
 
 import { identify, setUsername } from 'state/actions';
-import { isStringEmpty } from 'utils';
 
 import CursorPicker from 'components/CursorPicker';
 
 const mapStateToProps = state => ({
-  cursor: state.self.cursor,
-  isConnected: state.connection.isConnected,
+  isSubmitDisabled: !(state.self.cursor && state.self.username),
 });
 
 const mapDispatchToProps = dispatch => ({
-  dispatchIdentify: username => dispatch(identify(username)),
+  dispatchIdentify: event => {
+    if (event) event.preventDefault();
+    return dispatch(identify());
+  },
+  dispatchSetUsername: event => dispatch(setUsername(event.target.value))
 });
 
 class Identify extends Component {
@@ -21,31 +23,14 @@ class Identify extends Component {
   constructor() {
     super();
     autobind(this);
-
-    this.state = {
-      username: ''
-    };
-  }
-
-  handleInput(event) {
-    this.setState({ username: event.target.value });
-  }
-
-  identify(event) {
-    if (event) event.preventDefault();
-
-    const { dispatchIdentify } = this.props;
-    const { username } = this.state;
-    dispatchIdentify(username);
   }
 
   render() {
-    const { cursor } = this.props;
-    const { username } = this.state;
+    const { username, isSubmitDisabled, dispatchSetUsername, dispatchIdentify } = this.props;
 
     return (
       <div>
-        <form onSubmit={this.identify}>
+        <form onSubmit={dispatchIdentify}>
           <CursorPicker />
           <label htmlFor="username">username: </label>
           <input
@@ -53,12 +38,12 @@ class Identify extends Component {
             autoFocus={true}
             id="username"
             value={username}
-            onChange={this.handleInput}
+            onChange={dispatchSetUsername}
           />
           <button 
             type="submit" 
-            onClick={this.identify} 
-            disabled={!cursor || !username}
+            onClick={dispatchIdentify} 
+            disabled={isSubmitDisabled}
           >
             ok
           </button>
