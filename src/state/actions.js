@@ -12,10 +12,12 @@ export const UPDATE_USERS = 'USERS/update';
 export const UPDATE_MESSAGES = 'MESSAGES/update';
 
 export const IDENTIFY = `${SERVER_ACTION_PREFIX}USER/identify`;
+export const CLEAR_IDENTITY = `${SERVER_ACTION_PREFIX}USER/clearIdentity`;
 export const SET_POSITION = `${SERVER_ACTION_PREFIX}USER/setPosition`;
 
 export const SET_USERNAME = `SELF/setUsername`;
 export const SET_CURSOR = `SELF/setCursor`;
+export const SET_SHOULD_PERSIST_IDENTITY = `SELF/setShouldPersistIdentity`;
 
 export const SEND_MESSAGE = `${SERVER_ACTION_PREFIX}MESSAGES/send`;
 
@@ -48,6 +50,11 @@ export const setPosition = ({ x, y }) => (dispatch, getState) => {
   }
 };
 
+export const setShouldPersistIdentity = shouldPersistIdentity => ({
+  type: SET_SHOULD_PERSIST_IDENTITY,
+  data: { shouldPersistIdentity },
+});
+
 export const identify = () => (dispatch, getState) => {
   // Emit username and cursor at the same time to avoid weirdness
   const { self: { username, cursor } } = getState();
@@ -64,6 +71,10 @@ export const identify = () => (dispatch, getState) => {
     return null;
   }
 };
+
+export const clearIdentity = () => ({
+  type: CLEAR_IDENTITY,
+});
 
 export const sendMessage = message => ({
   type: SEND_MESSAGE,

@@ -93,6 +93,18 @@ io.on('connection', socket => {
           data: { messages }
         });
         break;
+      case actionTypes.CLEAR_IDENTITY:
+        if (!users[socket.id]) return;
+
+        delete users[socket.id];
+
+        debug(`user ${socket.id} cleared identity`);
+
+        io.emit(ACTION, {
+          type: actionTypes.UPDATE_USERS,
+          data: { users }
+        });
+        break;
       default:
         break;
     }

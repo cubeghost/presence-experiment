@@ -5,6 +5,7 @@ import io from 'socket.io-client';
 import autobind from 'class-autobind';
 import { map } from 'lodash';
 import debounce from 'debounce';
+import { PersistGate } from 'redux-persist/integration/react'
 
 import SocketProvider from 'components/SocketProvider';
 import Messages from 'components/Messages';
@@ -13,14 +14,14 @@ import Self from 'components/Self';
 
 import initialState from 'state/initial';
 import configureStore from 'state/store';
-import { setPosition } from 'state/actions';
+import { setPosition, clearIdentity } from 'state/actions';
 
 import Identify from './components/Identify';
 
 const MOUSE_DEBOUNCE = 10;
 
 const socket = io();
-const store = configureStore(initialState, socket);
+const { store, persistor } = configureStore(initialState, socket);
 
 const mapStateToProps = state => ({
   username: state.self.username,
@@ -34,6 +35,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   dispatchSetPosition: position => dispatch(setPosition(position)),
+  dispatchClearIdentity: () => dispatch(clearIdentity()),
 });
 
 class Client extends Component {
@@ -66,7 +68,7 @@ class Client extends Component {
   }
 
   render() {
-    const { socketId, isConnected, isIdentified, users, username } = this.props;
+    const { socketId, isConnected, isIdentified, users, username, dispatchClearIdentity } = this.props;
 
     return (
       <div style={{ 
@@ -90,7 +92,10 @@ class Client extends Component {
         </p>
         {isIdentified && (
           <Fragment>
-            <p>your username is <strong>{username}</strong></p>
+            <p>
+              your username is <strong>{username}</strong>
+              <button onClick={dispatchClearIdentity}>log out</button>
+            </p>
             <p>click to type messages</p>
           </Fragment>
         )}
@@ -118,9 +123,11 @@ const ConnectedClient = connect(mapStateToProps, mapDispatchToProps)(Client);
 
 const App = () => (
   <Provider store={store}>
-    <SocketProvider socket={socket}>
-      <ConnectedClient />
-    </SocketProvider>
+    <PersistGate loading={null} persistor={persistor}>
+      <SocketProvider socket={socket}>
+        <ConnectedClient />
+      </SocketProvider>
+    </PersistGate>
   </Provider>
 );
 

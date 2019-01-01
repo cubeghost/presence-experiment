@@ -84,7 +84,7 @@ class Self extends Component {
     if (!isIdentified || !position || !username) return null;
 
     return (
-      <div style={getPositionStyle(position)}>
+      <div style={{ ...getPositionStyle(position), pointerEvents: 'none' }}>
 
         <img src={get(CURSORS, `${cursor}.file`)} />
 

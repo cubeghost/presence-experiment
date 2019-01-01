@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
-import autobind from 'class-autobind';
 import { connect } from 'react-redux';
 
-import { identify, setUsername } from 'state/actions';
+import { identify, setUsername, setShouldPersistIdentity } from 'state/actions';
 
 import CursorPicker from 'components/CursorPicker';
 
 const mapStateToProps = state => ({
+  username: state.self.username,
   isSubmitDisabled: !(state.self.cursor && state.self.username),
+  shouldPersistIdentity: state.self.shouldPersistIdentity,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -15,18 +16,29 @@ const mapDispatchToProps = dispatch => ({
     if (event) event.preventDefault();
     return dispatch(identify());
   },
-  dispatchSetUsername: event => dispatch(setUsername(event.target.value))
+  dispatchSetUsername: event => dispatch(setUsername(event.target.value)),
+  dispatchSetShouldPersistIdentity: event => dispatch(setShouldPersistIdentity(event.target.checked)),
 });
 
 class Identify extends Component {
 
-  constructor() {
-    super();
-    autobind(this);
+  componentDidMount() {
+    const { shouldPersistIdentity, isSubmitDisabled, dispatchIdentify } = this.props;
+
+    if (shouldPersistIdentity && !isSubmitDisabled) {
+      dispatchIdentify();
+    }
   }
 
   render() {
-    const { username, isSubmitDisabled, dispatchSetUsername, dispatchIdentify } = this.props;
+    const { 
+      username, 
+      isSubmitDisabled, 
+      shouldPersistIdentity, 
+      dispatchSetUsername, 
+      dispatchIdentify, 
+      dispatchSetShouldPersistIdentity, 
+    } = this.props;
 
     return (
       <div>
@@ -47,6 +59,15 @@ class Identify extends Component {
           >
             ok
           </button>
+          <label htmlFor="shouldPersistIdentity">
+            <input
+              type="checkbox" 
+              id="shouldPersistIdentity" 
+              checked={shouldPersistIdentity}
+              onChange={dispatchSetShouldPersistIdentity}
+            />
+            remember me
+          </label>
         </form>
       </div>
     );

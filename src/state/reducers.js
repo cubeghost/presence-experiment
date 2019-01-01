@@ -20,6 +20,15 @@ const selfReducer = (state = initialState.self, action) => {
           x: action.data.x,  
           y: action.data.y,
         }});
+    case actionTypes.SET_SHOULD_PERSIST_IDENTITY:
+      return assign({}, state, {
+        shouldPersistIdentity: action.data.shouldPersistIdentity,
+      });
+    case actionTypes.CLEAR_IDENTITY:
+      return assign({}, state, {
+        username: initialState.self.username,
+        cursor: initialState.self.cursor,
+      });
     default:
       return state;
   }
@@ -59,6 +68,8 @@ const connectionReducer = (state = initialState.connection, action) => {
       return assign({}, state, { socketId: action.data.socketId });
     case actionTypes.IDENTIFY:
       return assign({}, state, { isIdentified: true });
+    case actionTypes.CLEAR_IDENTITY:
+      return assign({}, state, { isIdentified: false });
     default:
       return state;
   }

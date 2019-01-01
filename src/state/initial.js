@@ -2,7 +2,8 @@ export default {
   self: {
     username: '',
     position: null,
-    cursor: null
+    cursor: null,
+    shouldPersistIdentity: false,
   },
   users: {},
   messages: [],
