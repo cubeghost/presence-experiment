@@ -4,7 +4,7 @@ import thunk from 'redux-thunk';
 import { persistStore, persistReducer, createTransform } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 
-import { SERVER_ACTION_PREFIX } from 'state/actions';
+import { SERVER_ACTION_PREFIX } from 'state/actionTypes';
 import initialState from 'state/initial';
 import reducers from 'state/reducers';
 

@@ -2,7 +2,7 @@ import { assign } from 'lodash';
 import { combineReducers } from 'redux';
 
 import initialState from 'state/initial';
-import * as actionTypes from 'state/actions';
+import * as actionTypes from 'state/actionTypes';
 
 const selfReducer = (state = initialState.self, action) => {
   switch (action.type) {

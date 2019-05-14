@@ -21,6 +21,9 @@ module.exports = {
     },
 
     settings: {
+        react: {
+            version: 'detect'
+        },
         'import/ignore': ['node_modules', '\\.(json|css|jpg|png|gif|eot|svg|ttf|woff|woff2|mp4|webm)$'],
         'import/extensions': ['.js'],
         'import/resolver': {

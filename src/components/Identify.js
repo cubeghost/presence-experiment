@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { identify, setUsername, setShouldPersistIdentity } from 'state/actions';
+import { identify, setUsername, setShouldPersistIdentity } from 'state/actionCreators';
 
 import CursorPicker from 'components/CursorPicker';
 
@@ -47,7 +47,7 @@ class Identify extends Component {
           <label htmlFor="username">username: </label>
           <input
             type="text"
-            autoFocus={true}
+            //autoFocus={true}
             id="username"
             value={username}
             onChange={dispatchSetUsername}

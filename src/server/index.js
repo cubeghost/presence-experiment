@@ -5,10 +5,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const debugModule = require('debug');
 
-const actionTypes = require('./state/actions');
-
-// console.log(process.env.DEBUG)
-// console.log(debugModule.names)
+const { MessageClient, UserClient } = require('./redis');
+const actionTypes = require('../state/actionTypes');
 
 const app = express();
 /* eslint-disable new-cap */
@@ -21,88 +19,92 @@ app.use(express.static(buildDir));
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(buildDir, '/index.html'));
+  res.sendFile(path.join(buildDir, '../index.html'));
 });
 
 const ACTION = 'action';
 
-const users = {}; // TODO how to clean up????
-const messages = [];
+const userClient = new UserClient();
+const messageClient = new MessageClient();
 
-io.on('connection', socket => {
+io.on('connection', async socket => {
   const debug = debugModule('presence:user');
 
   debug(`a user connected ${socket.id}`);
 
   socket.emit(ACTION, {
     type: actionTypes.UPDATE_USERS,
-    data: { users }
+    data: { users: await userClient.list() }
   });
   socket.emit(ACTION, {
     type: actionTypes.UPDATE_MESSAGES,
-    data: { messages }
+    data: { messages: await messageClient.list() }
   });
 
-  socket.on(ACTION, ({ type, data }) => {
+  socket.on(ACTION, async ({ type, data }) => {
+    const user = await userClient.get(socket.id);
+
     switch (type) {
       case actionTypes.IDENTIFY:
         const { username, cursor } = data;
 
-        users[socket.id] = {
+        const newUser = {
           id: socket.id,
           username: username,
           cursor: cursor,
           position: null,
         };
-        
+        await userClient.set(newUser);
+
         debug(`user ${socket.id} set username to "${username}" and cursor to "${cursor}"`);
 
         io.emit(ACTION, { 
           type: actionTypes.UPDATE_USERS, 
-          data: { users } 
+          data: { users: userClient.list() } 
         });
         break;
 
       case actionTypes.SET_POSITION:
-        if (!users[socket.id]) return;
+        if (!user) return;
 
         const { x, y } = data;
-        users[socket.id].position = { x, y };
+        user.position = { x, y };
+
+        await userClient.set(user);
 
         io.emit(ACTION, {
           type: actionTypes.UPDATE_USERS,
-          data: { users }
+          data: { users: await userClient.list() }
         });
         break;
 
       case actionTypes.SEND_MESSAGE:
-        if (!users[socket.id]) return;
+        if (!user) return;
 
-        const { message } = data;
-        messages.push({
+        await messageClient.push({
           user: socket.id,
-          username: users[socket.id].username,
-          body: message,
+          username: user.username,
+          body: data.message,
           sentAt: Math.floor(new Date() / 1000),
         });
 
-        debug(`${users[socket.id].username} said: "${message}"`);
+        debug(`${user.username} said: "${data.message}"`);
 
         io.emit(ACTION, {
           type: actionTypes.UPDATE_MESSAGES,
-          data: { messages }
+          data: { messages: await messageClient.list() }
         });
         break;
       case actionTypes.CLEAR_IDENTITY:
-        if (!users[socket.id]) return;
+        if (!user) return;
 
-        delete users[socket.id];
+        await userClient.remove(user.id);
 
         debug(`user ${socket.id} cleared identity`);
 
         io.emit(ACTION, {
           type: actionTypes.UPDATE_USERS,
-          data: { users }
+          data: { users: await userClient.list() }
         });
         break;
       default:
@@ -110,14 +112,14 @@ io.on('connection', socket => {
     }
   });
 
-  socket.on('disconnect', () => {
-    delete users[socket.id];
+  socket.on('disconnect', async () => {
+    await userClient.remove(socket.id);
 
     debug(`user ${socket.id} disconnected`);
 
     io.emit(ACTION, {
       type: actionTypes.UPDATE_USERS,
-      data: { users }
+      data: { users: await userClient.list() }
     });
   });
 });
@@ -126,3 +128,4 @@ server.listen(process.env.PORT, () => {
   const debug = debugModule('presence:server');
   debug(`http://localhost:${process.env.PORT}/`);
 });
+

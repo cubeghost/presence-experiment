@@ -9,9 +9,6 @@ const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const WebpackCleanPlugin = require('clean-webpack-plugin');
-const HappyPack = require('happypack');
-/* eslint-disable new-cap */
-const happyThreadPool = HappyPack.ThreadPool({ size: 8 });
 
 const PROD = process.env.NODE_ENV === 'production';
 
@@ -48,12 +45,12 @@ const config = {
         enforce: 'pre',
         exclude: [/node_modules/],
         include: [paths.appSrc],
-        use: ['happypack/loader?id=eslint'],
+        loader: 'eslint-loader',
       },
       {
         test: /\.jsx?$/,
         include: [paths.appSrc],
-        use: ['happypack/loader?id=babel'],
+        use: 'babel-loader',
       },
       {
         test: /\.(jpg|png|gif|eot|svg|ttf|otf|woff|woff2)$/,
@@ -67,39 +64,6 @@ const config = {
     concatenateModules: true,
   },
   plugins: [
-    new HappyPack({
-      id: 'babel',
-      threadPool: happyThreadPool,
-      verbose: false,
-      debug: false,
-      loaders: [
-        {
-          loader: 'babel-loader',
-          query: {
-            cacheDirectory: findCacheDir({
-              name: 'experiment-happypack-cache',
-            }),
-          },
-        },
-      ],
-    }),
-    new HappyPack({
-      id: 'eslint',
-      threadPool: happyThreadPool,
-      verbose: false,
-      debug: false,
-      loaders: [
-        {
-          loader: 'eslint-loader',
-          options: {
-            configFile: path.join(__dirname, 'eslint.js'),
-            useEslintrc: false,
-            cache: false,
-            formatter: require('eslint-formatter-pretty'),
-          },
-        },
-      ],
-    }),
     new HtmlWebpackPlugin({
       inject: true,
       template: paths.appHtml,
@@ -118,12 +82,12 @@ const config = {
       },
     }),
     new webpack.EnvironmentPlugin(['NODE_ENV']),
-    new SimpleProgressWebpackPlugin({
-      format: 'compact',
-    }),
+    // new SimpleProgressWebpackPlugin({
+    //   format: 'compact',
+    // }),
     new FriendlyErrorsWebpackPlugin(),
     new CaseSensitivePathsPlugin(),
-    new WebpackCleanPlugin([`${paths.appBuild}/client.*.js`]),
+    // new WebpackCleanPlugin([`${paths.appBuild}/client.*.js`]),
   ]
 };
 

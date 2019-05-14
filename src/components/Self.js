@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { flow, isEmpty, trim } from 'lodash/fp';
 
-import { sendMessage } from 'state/actions';
+import { sendMessage } from 'state/actionCreators';
 
 import { CURSORS } from 'consts';
 import { getPositionStyle } from 'utils';

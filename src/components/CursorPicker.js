@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { map } from 'lodash';
 import { connect } from 'react-redux';
 
-import { setCursor } from 'state/actions';
+import { setCursor } from 'state/actionCreators';
 import { CURSORS } from 'consts';
 
 const CursorOption = ({ file, id, isSelected, dispatchSetCursor }) => (

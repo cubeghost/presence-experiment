@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { setSocketId, socketConnect, socketDisconnect, identify } from 'state/actions';
+import { setSocketId, socketConnect, socketDisconnect, identify } from 'state/actionCreators';
 
 const mapDispatchToProps = dispatch => ({
   dispatchSetSocketId: socketId => dispatch(setSocketId(socketId)),

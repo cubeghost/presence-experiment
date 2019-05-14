@@ -5,18 +5,17 @@
   "main": "src/server.js",
   "scripts": {
     "watch:client": "webpack --watch",
-    "watch:server": "nodemon --watch src/server.js --watch src/state.actions.js --exec babel-node src/server.js",
+    "watch:server": "nodemon --watch src/server/index.js --watch src/server/redis.js --watch src/state/actionTypes.js --exec babel-node src/server/index.js",
     "build:client": "webpack",
-    "build:server": "babel src/server.js -d build && babel src/state/actions.js -d build/state",
-    "start": "node build/server.js",
-    "build": "npm run build:server && npm run build:client",
-    "heroku-postbuild": "npm run build"
+    "build:server": "babel src/server/*.js -d build && babel src/state/actionTypes.js -d build/state",
+    "build": "npm run build:client && npm run build:server",
+    "start": "npm-run-all -p watch:client watch:server"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cubeghost/presence-experiment.git"
   },
-  "author": "Alex Baldwin <webmaster@cubegho.st> (https://cubegho.st/)",
+  "author": "alex baldwin <webmaster@cubegho.st> (https://cubegho.st/)",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/cubeghost/presence-experiment/issues"
@@ -46,6 +45,8 @@
     "friendly-errors-webpack-plugin": "^1.7.0",
     "happypack": "^5.0.0",
     "html-webpack-plugin": "^3.2.0",
+    "npm-run-all": "^4.1.5",
+    "nodemon": "^1.19.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-redux": "^6.0.0",
@@ -60,17 +61,20 @@
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
-    "body-parser": "^1.18.3",
+    "body-parser": "^1.19.0",
     "class-autobind": "^0.1.4",
     "debug": "^4.1.1",
-    "dotenv": "^6.2.0",
+    "dotenv": "^8.0.0",
     "express": "^4.16.4",
-    "helmet": "^3.15.0",
+    "helmet": "^3.18.0",
     "lodash": "^4.17.11",
     "socket.io": "^2.2.0",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "redis": "^2.8.0",
+    "serialize-javascript": "^1.7.0",
+    "util-promisifyall": "^1.0.6"
   },
   "eslintConfig": {
-    "extends": "./eslint.js"
+    "extends": "./eslintrc.js"
   }
 }

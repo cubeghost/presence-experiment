@@ -14,7 +14,7 @@ import Self from 'components/Self';
 
 import initialState from 'state/initial';
 import configureStore from 'state/store';
-import { setPosition, clearIdentity } from 'state/actions';
+import { setPosition, clearIdentity } from 'state/actionCreators';
 
 import Identify from './components/Identify';
 
