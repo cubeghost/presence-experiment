@@ -79,17 +79,9 @@ class Client extends Component {
         padding: '0.5em',
       }}>
         <h1 style={{ marginTop: 0 }}>ephemeral web presence space</h1>
-        <p>
-          <a href="https://github.com/cubeghost/presence-experiment" target="_blank">
-            github.com/cubeghost/presence-experiment
-          </a>
-        </p>
         {!isConnected && (
           <p style={{ color: 'red' }}>disconnected</p>
         )} 
-        <p>
-          your socket id is {socketId}
-        </p>
         {isIdentified && (
           <Fragment>
             <p>
