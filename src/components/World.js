@@ -14,14 +14,14 @@ const Sprite = ({ src, x, y }) => (
       position: 'fixed',
       top: '50vh',
       left: '50vw',
-      transform: `translateX(${x}) translateY(${y})`
+      transform: `translateX(${x}px) translateY(${y}px)`
     }}
   />
 );
 
 const World = () => (
   <div style={styles}>
-    <Sprite src="https://media.giphy.com/media/3otO6xRxnsZ8213SJa/100w.webp" x="20" y="40" />
+    <Sprite src="https://media.giphy.com/media/l41m2A9tjl7qanqMg/giphy.gif" x={100} y={100} />
   </div>
 );
 

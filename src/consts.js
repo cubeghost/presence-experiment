@@ -1,16 +1,20 @@
+function asset(filename) {
+  return `https://cdn.glitch.com/${process.env.PROJECT_ID}%2F${filename}`;
+}
+
 export const CURSORS = {
-  'black-cat': { file: require('assets/black-cat.gif'), id: 'black-cat' },
-  'brown-cat': { file: require('assets/brown-cat.png'), id: 'brown-cat' },
-  'cat-sleepy': { file: require('assets/cat-sleepy.gif'), id: 'cat-sleepy' },
-  'deer': { file: require('assets/deer.gif'), id: 'deer' },
-  'dinosaur': { file: require('assets/dino.gif'), id: 'dinosaur' },
-  'dog-pant': { file: require('assets/dog-pant.gif'), id: 'dog-pant' },
-  'frog': { file: require('assets/frog.gif'), id: 'frog' },
-  'lizard': { file: require('assets/lizard.gif'), id: 'lizard' },
-  'orange-cat': { file: require('assets/orange-cat.png'), id: 'orange-cat' },
-  'peacock': { file: require('assets/peacock.gif'), id: 'peacock' },
-  'penguin': { file: require('assets/penguin.gif'), id: 'penguin' },
-  'persian-sparkle': { file: require('assets/persian-sparkle.gif'), id: 'persian-sparkle' },
-  'shihtzu': { file: require('assets/shihtzu.gif'), id: 'shihtzu' },
-  'trex-sparkle': { file: require('assets/trex-sparkle.gif'), id: 'trex-sparkle' },
+  'black-cat': { file: asset('black-cat.gif'), id: 'black-cat' },
+  'brown-cat': { file: asset('brown-cat.png'), id: 'brown-cat' },
+  'cat-sleepy': { file: asset('cat-sleepy.gif'), id: 'cat-sleepy' },
+  'deer': { file: asset('deer.gif'), id: 'deer' },
+  'dinosaur': { file: asset('dino.gif'), id: 'dinosaur' },
+  'dog-pant': { file: asset('dog-pant.gif'), id: 'dog-pant' },
+  'frog': { file: asset('frog.gif'), id: 'frog' },
+  'lizard': { file: asset('lizard.gif'), id: 'lizard' },
+  'orange-cat': { file: asset('orange-cat.png'), id: 'orange-cat' },
+  'peacock': { file: asset('peacock.gif'), id: 'peacock' },
+  'penguin': { file: asset('penguin.gif'), id: 'penguin' },
+  'persian-sparkle': { file: asset('persian-sparkle.gif'), id: 'persian-sparkle' },
+  'shihtzu': { file: asset('shihtzu.gif'), id: 'shihtzu' },
+  'trex-sparkle': { file: asset('trex-sparkle.gif'), id: 'trex-sparkle' },
 };

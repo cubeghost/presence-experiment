@@ -14,7 +14,6 @@ const PROD = process.env.NODE_ENV === 'production';
 const paths = {
   appBuild: path.resolve(__dirname, './build'),
   appHtml: path.resolve(__dirname, './src/index.html'),
-  appFavicon: path.resolve(__dirname, './src/assets/favicon.png'),
   appPackageJson: path.resolve(__dirname, './package.json'),
   appSrc: path.resolve(__dirname, './src'),
   appNodeModules: path.resolve(__dirname, './node_modules'),
@@ -66,7 +65,6 @@ const config = {
     new HtmlWebpackPlugin({
       inject: true,
       template: paths.appHtml,
-      // favicon: paths.appFavicon,
       minify: {
         removeComments: true,
         collapseWhitespace: true,
@@ -80,7 +78,11 @@ const config = {
         minifyURLs: true,
       },
     }),
-    new webpack.EnvironmentPlugin(['NODE_ENV', 'DEBUG']),
+    new webpack.EnvironmentPlugin([
+      'NODE_ENV', 
+      'PROJECT_ID',
+      'DEBUG'
+    ]),
     new FriendlyErrorsWebpackPlugin(),
     new CaseSensitivePathsPlugin(),
     new WebpackCleanPlugin([
