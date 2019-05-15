@@ -7,9 +7,10 @@
     "watch:client": "webpack --watch",
     "watch:server": "nodemon --watch src/server/index.js --watch src/server/redis.js --watch src/state/actionTypes.js --exec babel-node src/server/index.js",
     "build:client": "webpack",
-    "build:server": "babel src/server/*.js -d build && babel src/state/actionTypes.js -d build/state",
-    "build": "npm run build:client && npm run build:server",
-    "start": "npm-run-all -p watch:client watch:server"
+    "build:server": "babel src/server/*.js -d build/server && babel src/state/actionTypes.js -d build/state",
+    "build": "npm-run-all build:*",
+    "prestart": "npm run watch:client &",
+    "start": "npm run build:server && node build/server/index.js"
   },
   "repository": {
     "type": "git",

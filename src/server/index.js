@@ -3,6 +3,7 @@ require('dotenv').config({ debug: true });
 const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
+const { difference } = require('lodash');
 const debugModule = require('debug');
 
 const { MessageClient, UserClient } = require('./redis');
@@ -53,6 +54,7 @@ io.on('connection', async socket => {
           username: username,
           cursor: cursor,
           position: null,
+          typing: null,
         };
         await userClient.set(newUser);
 
@@ -69,6 +71,20 @@ io.on('connection', async socket => {
 
         const { x, y } = data;
         user.position = { x, y };
+
+        await userClient.set(user);
+
+        io.emit(ACTION, {
+          type: actionTypes.UPDATE_USERS,
+          data: { users: await userClient.list() }
+        });
+        break;
+
+      case actionTypes.SET_TYPING:
+        if (!user) return;
+
+        const { typing } = data;
+        user.typing = typing;
 
         await userClient.set(user);
 
@@ -123,6 +139,27 @@ io.on('connection', async socket => {
     });
   });
 });
+
+setInterval(async () => {
+  const debug = debugModule('presence:socket');
+  
+  const currentSockets = Object.keys(io.sockets.sockets);
+  const users = await userClient.list();
+  const userIds = users.map(user => user.id);
+  
+  const ghostUsers = difference(userIds, currentSockets);
+  
+  if (ghostUsers.length) {
+    debug(`removing ${ghostUsers.length} ghost users`);
+    
+    await userClient.removeMultiple(ghostUsers);
+    
+    io.emit(ACTION, {
+      type: actionTypes.UPDATE_USERS,
+      data: { users: await userClient.list() }
+    });
+  }
+}, 1000 * 20);
 
 server.listen(process.env.PORT, () => {
   const debug = debugModule('presence:server');

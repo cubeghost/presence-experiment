@@ -30,6 +30,11 @@ export const setPosition = ({ x, y }) => (dispatch, getState) => {
   }
 };
 
+export const setTyping = typing => ({
+  type: actionTypes.SET_TYPING,
+  data: { typing },
+});
+
 export const setShouldPersistIdentity = shouldPersistIdentity => ({
   type: actionTypes.SET_SHOULD_PERSIST_IDENTITY,
   data: { shouldPersistIdentity },

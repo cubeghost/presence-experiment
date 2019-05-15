@@ -5,7 +5,6 @@ const webpack = require('webpack');
 const findCacheDir = require('find-cache-dir');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
-const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const WebpackCleanPlugin = require('clean-webpack-plugin');
@@ -81,13 +80,13 @@ const config = {
         minifyURLs: true,
       },
     }),
-    new webpack.EnvironmentPlugin(['NODE_ENV']),
-    // new SimpleProgressWebpackPlugin({
-    //   format: 'compact',
-    // }),
+    new webpack.EnvironmentPlugin(['NODE_ENV', 'DEBUG']),
     new FriendlyErrorsWebpackPlugin(),
     new CaseSensitivePathsPlugin(),
-    // new WebpackCleanPlugin([`${paths.appBuild}/client.*.js`]),
+    new WebpackCleanPlugin([
+      `${paths.appBuild}/client.*.js`,
+      `${paths.appBuild}/vendor.*.js`,
+    ]),
   ]
 };
 

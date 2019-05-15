@@ -11,6 +11,7 @@ import SocketProvider from 'components/SocketProvider';
 import Messages from 'components/Messages';
 import User from 'components/User';
 import Self from 'components/Self';
+import World from 'components/World';
 
 import initialState from 'state/initial';
 import configureStore from 'state/store';
@@ -78,6 +79,7 @@ class Client extends Component {
         boxSizing: 'border-box',
         padding: '0.5em',
       }}>
+        <World />
         <h1 style={{ marginTop: 0 }}>ephemeral web presence space</h1>
         {!isConnected && (
           <p style={{ color: 'red' }}>disconnected</p>
@@ -100,6 +102,7 @@ class Client extends Component {
               username={user.username} 
               position={user.position} 
               cursor={user.cursor} 
+              typing={user.typing} 
               key={user.id} 
             />
           );

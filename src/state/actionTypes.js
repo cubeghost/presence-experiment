@@ -9,6 +9,7 @@ export const UPDATE_MESSAGES = 'MESSAGES/update';
 export const IDENTIFY = `${SERVER_ACTION_PREFIX}USER/identify`;
 export const CLEAR_IDENTITY = `${SERVER_ACTION_PREFIX}USER/clearIdentity`;
 export const SET_POSITION = `${SERVER_ACTION_PREFIX}USER/setPosition`;
+export const SET_TYPING = `${SERVER_ACTION_PREFIX}USER/setTyping`;
 
 export const SET_USERNAME = `SELF/setUsername`;
 export const SET_CURSOR = `SELF/setCursor`;

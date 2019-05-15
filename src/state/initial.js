@@ -3,6 +3,7 @@ export default {
     username: '',
     position: null,
     cursor: null,
+    typing: null,
     shouldPersistIdentity: false,
   },
   users: {},

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { flow, isEmpty, trim } from 'lodash/fp';
 
-import { sendMessage } from 'state/actionCreators';
+import { sendMessage, setTyping } from 'state/actionCreators';
 
 import { CURSORS } from 'consts';
 import { getPositionStyle } from 'utils';
@@ -20,6 +20,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
+  dispatchSetTyping: message => dispatch(setTyping(message)),
   dispatchSendMessage: message => dispatch(sendMessage(message)),
 });
 
@@ -44,17 +45,33 @@ class Self extends Component {
   }
 
   handleClick() {
-    const { isIdentified, isConnected } = this.props;
+    const { isIdentified, isConnected, dispatchSetTyping } = this.props;
     const { isInputEnabled } = this.state;
 
     if (isIdentified && isConnected) {
+      if (isInputEnabled) {
+        dispatchSetTyping(null);
+      }
       this.setState({ isInputEnabled: !isInputEnabled });
     }
   }
 
   handleInput(event) {
+    const { dispatchSetTyping } = this.props;
+    const message = event.target.value;
+    
+    this.setState({ message });
+    dispatchSetTyping(message);
+  }
+  
+  reset() {
+    const { dispatchSetTyping } = this.props;
+    
+    dispatchSetTyping(null);
+    
     this.setState({
-      message: event.target.value,
+      isInputEnabled: false,
+      message: ''
     });
   }
 
@@ -64,17 +81,11 @@ class Self extends Component {
     const { dispatchSendMessage } = this.props;
     const { message } = this.state;
 
-    const resetState = {
-      isInputEnabled: false,
-      message: ''
-    };
-
     if (!isStringEmpty(message)) {
       dispatchSendMessage(message);
-      this.setState(resetState);
-    } else {
-      this.setState(resetState);
     }
+    
+    this.reset();
   }
 
   render() {

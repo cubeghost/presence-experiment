@@ -7,6 +7,7 @@ const User = ({
   username,
   position,
   cursor,
+  typing,
 }) => {
   if (!position || !username) return null;
 
@@ -14,6 +15,9 @@ const User = ({
     <div style={getPositionStyle(position)}>
       <img src={CURSORS[cursor].file} />
       <span style={{ marginLeft: '0.25em' }}>{username}</span>
+      {(typing !== null) && (
+        <span>&nbsp;is typing "{typing}"</span>
+      )}
     </div>
   );
 };
