@@ -42,9 +42,14 @@ class Identify extends Component {
 
     return (
       <div>
-        <form onSubmit={dispatchIdentify}>
+        <form className="inline pink" onSubmit={dispatchIdentify}>
           <CursorPicker />
-          <label htmlFor="username">username: </label>
+          <label 
+            htmlFor="username" 
+            className="underline"
+          >
+            username:
+          </label>
           <input
             type="text"
             //autoFocus={true}
@@ -54,12 +59,14 @@ class Identify extends Component {
           />
           <button 
             type="submit" 
+            className="box pink"
             onClick={dispatchIdentify} 
             disabled={isSubmitDisabled}
           >
             ok
           </button>
           <label htmlFor="shouldPersistIdentity">
+            &nbsp;&nbsp;
             <input
               type="checkbox" 
               id="shouldPersistIdentity" 

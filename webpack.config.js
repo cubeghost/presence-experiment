@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const path = require('path');
+const fs = require('fs');
 const webpack = require('webpack');
 const findCacheDir = require('find-cache-dir');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -8,6 +9,10 @@ const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const WebpackCleanPlugin = require('clean-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const glob = require('glob');
+const del = require('del');
+const { flow, map, orderBy, slice } = require('lodash/fp');
 
 const PROD = process.env.NODE_ENV === 'production';
 
@@ -18,6 +23,25 @@ const paths = {
   appSrc: path.resolve(__dirname, './src'),
   appNodeModules: path.resolve(__dirname, './node_modules'),
 };
+
+class HookPlugin {
+  constructor(hooks, fn) {
+    this.hooks = hooks;
+    this.fn = fn;
+  }
+
+  apply(compiler) {
+    const handler = params => {
+      if (typeof this.fn === 'function') {
+        this.fn(compiler, params);
+      }
+    }
+
+    this.hooks.forEach(hook => {
+      compiler.hooks[hook].tap('hook-webpack-plugin', handler);
+    });
+  }
+}
 
 const config = {
   mode: 'development',
@@ -43,7 +67,7 @@ const config = {
         enforce: 'pre',
         exclude: [/node_modules/],
         include: [paths.appSrc],
-        loader: 'eslint-loader',
+        use: 'eslint-loader',
       },
       {
         test: /\.jsx?$/,
@@ -51,9 +75,14 @@ const config = {
         use: 'babel-loader',
       },
       {
-        test: /\.(jpg|png|gif|eot|svg|ttf|otf|woff|woff2)$/,
+        test: /\.css$/,
         include: [paths.appSrc],
-        loader: 'file-loader',
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+          },
+          'css-loader'
+        ]
       }
     ],
   },
@@ -62,6 +91,9 @@ const config = {
     concatenateModules: true,
   },
   plugins: [
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+    }),
     new HtmlWebpackPlugin({
       inject: true,
       template: paths.appHtml,
@@ -85,10 +117,34 @@ const config = {
     ]),
     new FriendlyErrorsWebpackPlugin(),
     new CaseSensitivePathsPlugin(),
-    new WebpackCleanPlugin([
-      `${paths.appBuild}/client.*.js`,
-      `${paths.appBuild}/vendor.*.js`,
-    ]),
+    new HookPlugin(['done', 'invalid'], (compilation) => {
+      
+      // delete all client bundles except the newest and second-newest
+      // helps save disk space on glitch
+      glob('build/client*.js', {}, (err, fileList) => {
+        const files = flow(
+          map(filename => {
+            let timestamp = 0;
+            try {
+              timestamp = fs.statSync(filename).mtime.getTime()
+            } catch(e) {}
+            return {
+              filename: filename,
+              time: timestamp
+            }
+          }),
+          orderBy(['time'], 'desc'),
+          slice(2, fileList.length),
+          map('filename'),
+        )(fileList);
+        
+        if (files.length > 0) {
+          del(files);
+          console.log('cleaned old build files', files);
+        }
+        
+      });
+    })
   ]
 };
 

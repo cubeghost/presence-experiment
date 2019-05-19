@@ -1,0 +1,194 @@
+:root {
+  --font: 'Courier New', Courier, monospace;
+  
+  --color-rgb: 0, 0, 255; /* #00F */
+  --color: rgba(var(--color-rgb), 1);
+}
+.pink {
+  --color-rgb: 255, 0, 255; /* #F0F */
+  --color: rgba(var(--color-rgb), 1);
+}
+.purple {
+  --color-rgb: 153, 0, 255; /* #90F */
+  --color: rgba(var(--color-rgb), 1);
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background-image: url(https://cdn.glitch.com/f4b5730f-2a28-4c77-900c-464991553152%2Ftile.svg?1558141090359);
+}
+
+.box {
+  border: 2px solid var(--color);
+  box-shadow: 10px 10px 0 0 var(--color);
+  background-color: #fff;
+  padding: 8px 16px;
+  display: table;
+  position: relative;
+  z-index: 2;
+}
+
+button {
+  font-size: 1em;
+  font-family: var(--font);  
+}
+
+button.box {
+  display: inline;
+  box-shadow: 4px 4px 0 0 var(--color);
+}
+button.box:active,
+button.box:focus {
+  outline: 0;
+  box-shadow: 2px 2px 0 0 var(--color);
+}
+button.box:disabled {
+  color: #000;
+  opacity: 0.4;
+}
+
+.box p:first-child {
+  margin-top: 0.5rem;
+}
+.box p:last-child {
+  margin-bottom: 0.5rem;
+}
+
+
+.container {
+  position: fixed;
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100vh;
+  padding: 0.5rem;
+}
+
+h1 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.messages {
+  opacity: 0.75;
+  position: absolute;
+  bottom: 0.5rem;
+  max-width: 50vw;
+  z-index: 1;
+}
+
+.world {
+  z-index: -2;
+}
+
+.identity {
+  transform: translateX(2rem) translateY(-2.25rem);
+}
+
+.log-out {
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform: translateX(calc(5rem + 15px)) translateY(calc(2rem + 6px));
+}
+
+.header {
+  padding-bottom: 2.5rem;
+  padding-right: 4rem;
+  position: relative;
+}
+.about-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform: translateX(4rem) translateY(1rem);
+}
+.close-about-button {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  transform: translateX(2rem) translateY(1rem);
+}
+.about {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  z-index: 5;
+}
+
+
+input[type=text] {
+  font-family: var(--font);
+  border: 2px solid var(--color);
+}
+input[type=text]:focus {
+  outline: 0;
+  box-shadow: 2px 2px 0 0 rgba(var(--color-rgb), 0.5);
+}
+
+form label.underline {
+  margin-right: 0.5rem;
+  border-bottom: 2px solid var(--color);
+}
+
+form.inline button.box {
+  padding: 4px 12px;
+  margin-right: 0.5rem;
+}
+
+form.inline input {
+  padding: 6px;
+  margin-right: 0.5rem;
+}
+
+
+.cursor-picker {
+  margin-bottom: 0.5rem;
+}
+.cursor-option {
+  display: inline-block;
+  padding: 2px;
+}
+.cursor-option.is-selected {
+  background-color: rgba(var(--color-rgb), 0.5);
+}
+.cursor-option input[type=radio] {
+  opacity: 0;
+  height: 0;
+  width: 0;
+  margin: 0;
+  display: block;
+}
+.cursor-option img {
+  display: block;
+}
+
+
+.user {
+  display: flex;
+  align-items: center;
+  z-index: 100;
+}
+.user img {
+  margin-right: 0.5rem;
+}
+
+.self {
+  z-index: 100;
+  pointer-events: none;
+}
+.self form {
+  margin-top: 0.5rem;
+}
+
+
+.glitch-buttons {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.75rem;
+}

@@ -27,15 +27,16 @@ export class MessageClient {
   }
   
   async list() {
-    const list = await this.client.lrangeAsync(this.key, 0, 100) || [];
+    const list = await this.client.lrangeAsync(this.key, 0, 99) || [];
     return list.map(JSON.parse);
   }
   
   async push(message) {
-    return await this.client.rpushAsync(
+    await this.client.lpushAsync(
       this.key,
       serialize(message)
     );
+    return await this.client.ltrimAsync(this.key, 0, 99);
   }
 };
 

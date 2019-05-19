@@ -95,14 +95,15 @@ class Self extends Component {
     if (!isIdentified || !position || !username) return null;
 
     return (
-      <div style={{ ...getPositionStyle(position), pointerEvents: 'none' }}>
-
-        <img src={get(CURSORS, `${cursor}.file`)} />
-
-        <span style={{ marginLeft: '0.25em' }}>{username}</span>
+      <div className="self" style={getPositionStyle(position)}>
+        
+        <div className="user">
+          <img src={get(CURSORS, `${cursor}.file`)} alt={CURSORS[cursor].id} />
+          <span className="username">{username}</span>
+        </div>
 
         {isInputEnabled && (
-          <form onSubmit={this.sendMessage}>
+          <form className="inline purple" onSubmit={this.sendMessage}>
             <input
               type="text"
               autoFocus={true}

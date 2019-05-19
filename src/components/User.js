@@ -12,12 +12,14 @@ const User = ({
   if (!position || !username) return null;
 
   return (
-    <div style={getPositionStyle(position)}>
-      <img src={CURSORS[cursor].file} />
-      <span style={{ marginLeft: '0.25em' }}>{username}</span>
-      {(typing !== null) && (
-        <span>&nbsp;is typing "{typing}"</span>
-      )}
+    <div className="user" style={getPositionStyle(position)}>
+      <img src={CURSORS[cursor].file} alt={CURSORS[cursor].id} />
+      <span className="username">
+        {username}
+        {(typing !== null) && (
+          <span>&nbsp;is typing "{typing}"</span>
+        )}
+      </span>
     </div>
   );
 };

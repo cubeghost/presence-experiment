@@ -1,3 +1,4 @@
+// TODO this could be a webpack loader 👀
 function asset(filename) {
   return `https://cdn.glitch.com/${process.env.PROJECT_ID}%2F${filename}`;
 }
